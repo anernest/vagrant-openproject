@@ -3,28 +3,34 @@
 set -ex
 
 # Installation settings
-PROJECT_NAME=$1
-PROJECT_DIR=/home/vagrant/$PROJECT_NAME
+PROJECT_NAME=""
+PROJECT_DIR=/vagrant/$PROJECT_NAME
 
-PGSQL_VERSION=9.1
+PGSQL_VERSION=10
 
 if [ ! -f /home/vagrant/.locales ]; then
     # Need to fix locale so that Postgres creates databases in UTF-8
     cp -p $PROJECT_DIR/etc/install/etc-bash.bashrc /etc/bash.bashrc
-    locale-gen en_GB.UTF-8
-    dpkg-reconfigure locales
+    locale-gen en_US.UTF-8
+    #dpkg-reconfigure locales
     touch /home/vagrant/.locales
 fi
 
-export LANGUAGE=en_GB.UTF-8
-export LANG=en_GB.UTF-8
-export LC_ALL=en_GB.UTF-8
+export LANGUAGE=en_US.UTF-8
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
 
-wget -qO - https://deb.packager.io/key | sudo apt-key add -
-echo "deb https://deb.packager.io/gh/tessi/openproject precise feature/pkgr" | sudo tee /etc/apt/sources.list.d/openproject.list
+# wget -qO - https://deb.packager.io/key | sudo apt-key add -
+# echo "deb https://deb.packager.io/gh/tessi/openproject precise feature/pkgr" | sudo tee /etc/apt/sources.list.d/openproject.list
+
+wget -qO- https://dl.packager.io/srv/opf/openproject/key | apt-key add -
+add-apt-repository universe
+wget -O /etc/apt/sources.list.d/openproject.list https://dl.packager.io/srv/opf/openproject/stable/10/installer/ubuntu/18.04.repo
 
 # Install essential packages from Apt
-sudo apt-get update -y
+apt-get update -y
+
+apt-get install -y openproject
 
 # Postgresql
 if ! command -v psql; then
@@ -58,7 +64,7 @@ fi
 
 # now install openproject
 if ! command -v openproject; then
-    apt-get install -y openproject*=3.0.1-1400061402.f476e5c.precise
+    # apt-get install -y openproject*=3.0.1-1400061402.f476e5c.precise
 
     # create database
     createuser -U postgres -S -D -R openproject
